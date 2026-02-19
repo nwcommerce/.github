@@ -3,6 +3,7 @@ name: Task / Chore
 about: 기술 작업, 리팩토링, 인프라, 문서화 등
 title: "[Task] "
 labels: task
+type: Task
 assignees: ""
 ---
 
