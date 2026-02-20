@@ -1,0 +1,75 @@
+{
+  "username": "R2-D2",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🚨 {{ENVIRONMENT}} Deployment Failed",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Project*\n`{{PROJECT_NAME}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Environment*\n`{{ENVIRONMENT}}`"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Lambda Function*\n`{{DEPLOY_TARGET}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Branch*\n`{{GITHUB_REF_NAME}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": { "type": "plain_text", "text": "View Workflow", "emoji": true },
+          "style": "danger",
+          "url": "{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}"
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "💡 Workflow 로그를 확인하고 재배포 또는 롤백을 진행하세요."
+        }
+      ]
+    }
+  ]
+}
