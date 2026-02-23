@@ -74,6 +74,14 @@ slack-templates/
     └── notify-failure.json
 ```
 
+템플릿은 Slack `attachments` + `color` 를 사용해 상태별 color bar를 표시합니다.
+
+| 템플릿 | Color bar | Emoji |
+|---|---|---|
+| `notify-start.json` | `#000000` (black) | 🚀 |
+| `notify-success.json` | `#2EB67D` (green) | 🎉 |
+| `notify-failure.json` | `#E01E5A` (red) | 🚨 |
+
 ---
 
 #### 사용법
@@ -89,6 +97,9 @@ slack-templates/
 
 **3. Workflow에서 호출**
 
+> **주의:** `workflow_call`의 `with` 블록에서는 `needs` 컨텍스트를 사용할 수 없습니다.  
+> 성공/실패 알림은 `notify-success` / `notify-failure` job을 각각 분리하고 `if:` 조건으로 제어하세요.
+
 **Lambda 예시**
 
 ```yaml
@@ -96,7 +107,7 @@ slack-templates/
 
 jobs:
   notify-start:
-    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main  # ← 주의: workflow-templates/ 아님
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
       template_path: .github/slack/notify-start.json
       environment: PROD
@@ -111,12 +122,24 @@ jobs:
     steps:
       - run: echo "deploy steps here"
 
-  notify-result:
+  notify-success:
     needs: [notify-start, deploy]
-    if: always()
+    if: needs.deploy.result == 'success'
     uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
-      template_path: ${{ needs.deploy.result == 'success' && '.github/slack/notify-success.json' || '.github/slack/notify-failure.json' }}
+      template_path: .github/slack/notify-success.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-lambda-function-name
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+
+  notify-failure:
+    needs: [notify-start, deploy]
+    if: needs.deploy.result != 'success'
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_path: .github/slack/notify-failure.json
       environment: PROD
       project_name: my-service
       deploy_target: my-lambda-function-name
@@ -136,7 +159,7 @@ jobs:
       template_path: .github/slack/notify-start.json
       environment: PROD
       project_name: my-service
-      deploy_target: my-ecs-service-name   # ECS 서비스명 또는 Task 정의명
+      deploy_target: my-ecs-service-name
       cluster_name: my-ecs-cluster
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
@@ -147,12 +170,25 @@ jobs:
     steps:
       - run: echo "deploy steps here"
 
-  notify-result:
+  notify-success:
     needs: [notify-start, deploy]
-    if: always()
+    if: needs.deploy.result == 'success'
     uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
-      template_path: ${{ needs.deploy.result == 'success' && '.github/slack/notify-success.json' || '.github/slack/notify-failure.json' }}
+      template_path: .github/slack/notify-success.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-ecs-service-name
+      cluster_name: my-ecs-cluster
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+
+  notify-failure:
+    needs: [notify-start, deploy]
+    if: needs.deploy.result != 'success'
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_path: .github/slack/notify-failure.json
       environment: PROD
       project_name: my-service
       deploy_target: my-ecs-service-name
