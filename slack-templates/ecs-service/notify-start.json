@@ -27,11 +27,11 @@
       "fields": [
         {
           "type": "mrkdwn",
-          "text": "*ECS Service*\n`{{DEPLOY_TARGET}}`"
+          "text": "*Cluster*\n`{{CLUSTER_NAME}}`"
         },
         {
           "type": "mrkdwn",
-          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
+          "text": "*ECS Service*\n`{{DEPLOY_TARGET}}`"
         }
       ]
     },
@@ -40,21 +40,20 @@
       "fields": [
         {
           "type": "mrkdwn",
-          "text": "*Branch*\n`{{GITHUB_REF_NAME}}`"
+          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
         },
         {
           "type": "mrkdwn",
-          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
+          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
         }
       ]
     },
     {
-      "type": "actions",
+      "type": "context",
       "elements": [
         {
-          "type": "button",
-          "text": { "type": "plain_text", "text": "View Workflow", "emoji": true },
-          "url": "{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}"
+          "type": "mrkdwn",
+          "text": "📦 *{{PROJECT_NAME}}* | {{GITHUB_REF_NAME}} | <{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}|View Workflow>"
         }
       ]
     }

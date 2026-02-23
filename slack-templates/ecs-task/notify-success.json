@@ -5,7 +5,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "✅ {{ENVIRONMENT}} Task Definition Updated",
+        "text": "🚀 {{ENVIRONMENT}} Task Definition Updated",
         "emoji": true
       }
     },
@@ -27,11 +27,11 @@
       "fields": [
         {
           "type": "mrkdwn",
-          "text": "*Task Definition*\n`{{DEPLOY_TARGET}}`"
+          "text": "*Cluster*\n`{{CLUSTER_NAME}}`"
         },
         {
           "type": "mrkdwn",
-          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
+          "text": "*Task Definition*\n`{{DEPLOY_TARGET}}`"
         }
       ]
     },
@@ -40,21 +40,11 @@
       "fields": [
         {
           "type": "mrkdwn",
-          "text": "*Branch*\n`{{GITHUB_REF_NAME}}`"
+          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
         },
         {
           "type": "mrkdwn",
-          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
-        }
-      ]
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": { "type": "plain_text", "text": "View Workflow", "emoji": true },
-          "url": "{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}"
+          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
         }
       ]
     },
@@ -66,7 +56,7 @@
       "elements": [
         {
           "type": "mrkdwn",
-          "text": "🎉 New task definition revision registered and service updated."
+          "text": "📦 *{{PROJECT_NAME}}* | {{GITHUB_REF_NAME}} | <{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}|View Workflow>"
         }
       ]
     }

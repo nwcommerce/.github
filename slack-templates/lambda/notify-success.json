@@ -5,7 +5,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "✅ {{ENVIRONMENT}} Deployment Successful",
+        "text": "🚀 {{ENVIRONMENT}} Deployment Successful",
         "emoji": true
       }
     },
@@ -40,21 +40,7 @@
       "fields": [
         {
           "type": "mrkdwn",
-          "text": "*Branch*\n`{{GITHUB_REF_NAME}}`"
-        },
-        {
-          "type": "mrkdwn",
           "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
-        }
-      ]
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": { "type": "plain_text", "text": "View Workflow", "emoji": true },
-          "url": "{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}"
         }
       ]
     },
@@ -66,7 +52,7 @@
       "elements": [
         {
           "type": "mrkdwn",
-          "text": "🎉 Lambda function updated successfully."
+          "text": "📦 *{{PROJECT_NAME}}* | {{GITHUB_REF_NAME}} | <{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}|View Workflow>"
         }
       ]
     }
