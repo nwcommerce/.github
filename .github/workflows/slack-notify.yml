@@ -6,10 +6,10 @@ on:
       template_path:
         description: |
           Slack Block Kit JSON 템플릿 파일 경로 (호출 repo 기준).
-          지원 플레이스홀더: {{STATUS}}, {{ENVIRONMENT}}, {{PROJECT_NAME}},
-          {{DEPLOY_TARGET}}, {{CLUSTER_NAME}}, {{GITHUB_SHA}}, {{GITHUB_SHA_SHORT}},
-          {{GITHUB_ACTOR}}, {{GITHUB_REF_NAME}}, {{GITHUB_SERVER_URL}},
-          {{GITHUB_REPOSITORY}}, {{GITHUB_RUN_ID}}
+          지원 플레이스홀더: <STATUS>, <ENVIRONMENT>, <PROJECT_NAME>,
+          <DEPLOY_TARGET>, <CLUSTER_NAME>, <GITHUB_SHA>, <GITHUB_SHA_SHORT>,
+          <GITHUB_ACTOR>, <GITHUB_REF_NAME>, <GITHUB_SERVER_URL>,
+          <GITHUB_REPOSITORY>, <GITHUB_RUN_ID>
         required: true
         type: string
       environment:
