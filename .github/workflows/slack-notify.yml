@@ -26,7 +26,7 @@ on:
 
 jobs:
   notify:
-    name: Send Slack Notification
+    name: Slack Notification
     runs-on: ubuntu-latest
     steps:
       - name: Checkout caller repo
