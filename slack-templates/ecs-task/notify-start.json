@@ -1,59 +1,74 @@
 {
   "username": "R2-D2",
-  "blocks": [
+  "attachments": [
     {
-      "type": "header",
-      "text": {
-        "type": "plain_text",
-        "text": "🚀 {{ENVIRONMENT}} Task Definition Update Started",
-        "emoji": true
-      }
-    },
-    {
-      "type": "section",
-      "fields": [
+      "color": "#000000",
+      "blocks": [
         {
-          "type": "mrkdwn",
-          "text": "*Project*\n`{{PROJECT_NAME}}`"
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "🚀 {{ENVIRONMENT}} Task Definition Update Started",
+            "emoji": true
+          }
         },
         {
-          "type": "mrkdwn",
-          "text": "*Environment*\n`{{ENVIRONMENT}}`"
-        }
-      ]
-    },
-    {
-      "type": "section",
-      "fields": [
-        {
-          "type": "mrkdwn",
-          "text": "*Cluster*\n`{{CLUSTER_NAME}}`"
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Project*\n`{{PROJECT_NAME}}`"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Environment*\n`{{ENVIRONMENT}}`"
+            }
+          ]
         },
         {
-          "type": "mrkdwn",
-          "text": "*Task Definition*\n`{{DEPLOY_TARGET}}`"
-        }
-      ]
-    },
-    {
-      "type": "section",
-      "fields": [
-        {
-          "type": "mrkdwn",
-          "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Cluster*\n`{{CLUSTER_NAME}}`"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Task Definition*\n`{{DEPLOY_TARGET}}`"
+            }
+          ]
         },
         {
-          "type": "mrkdwn",
-          "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
-        }
-      ]
-    },
-    {
-      "type": "context",
-      "elements": [
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Triggered by*\n`{{GITHUB_ACTOR}}`"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Branch*\n`{{GITHUB_REF_NAME}}`"
+            }
+          ]
+        },
         {
-          "type": "mrkdwn",
-          "text": "📦 *{{PROJECT_NAME}}* | {{GITHUB_REF_NAME}} | <{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}|View Workflow>"
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Commit*\n<{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/commit/{{GITHUB_SHA}}|`{{GITHUB_SHA_SHORT}}`>"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": { "type": "plain_text", "text": "View Workflow", "emoji": true },
+              "url": "{{GITHUB_SERVER_URL}}/{{GITHUB_REPOSITORY}}/actions/runs/{{GITHUB_RUN_ID}}"
+            }
+          ]
         }
       ]
     }
