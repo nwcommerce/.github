@@ -5,13 +5,8 @@
 
 ---
 
-#### 레퍼런스
-
-- [GitHub Reusable Workflows 공식 문서](https://docs.github.com/en/actions/sharing-automations/reusing-workflows)
-- [Slack Block Kit Builder](https://app.slack.com/block-kit-builder)
-- [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks)
-
----
+<details>
+<summary><strong>Inputs & Secrets</strong></summary>
 
 #### Inputs
 
@@ -29,7 +24,12 @@
 |---|---|---|
 | `slack_webhook_url` | ✅ | Slack Incoming Webhook URL |
 
-#### 템플릿 플레이스홀더
+</details>
+
+---
+
+<details>
+<summary><strong>템플릿 플레이스홀더</strong></summary>
 
 JSON 템플릿 내에서 아래 `{{PLACEHOLDER}}` 형식을 사용하면 자동으로 치환됩니다.
 
@@ -47,9 +47,12 @@ JSON 템플릿 내에서 아래 `{{PLACEHOLDER}}` 형식을 사용하면 자동�
 | `{{GITHUB_REPOSITORY}}` | `owner/repo` |
 | `{{GITHUB_RUN_ID}}` | 워크플로우 실행 ID |
 
+</details>
+
 ---
 
-#### 예제 템플릿
+<details>
+<summary><strong>예제 템플릿</strong></summary>
 
 `slack-templates/` 디렉터리에 배포 대상별 예제 템플릿이 있습니다.  
 각 repo의 `.github/slack/` 디렉터리에 복사 후 필요에 따라 수정하세요.
@@ -78,9 +81,11 @@ slack-templates/
 | `notify-success.json` | `#2EB67D` (green) | 🎉 |
 | `notify-failure.json` | `#E01E5A` (red) | 🚨 |
 
+</details>
+
 ---
 
-#### 사용법
+### 사용법
 
 **1. Slack Webhook URL을 repo Secret에 등록**
 
@@ -96,7 +101,8 @@ slack-templates/
 > **주의:** `workflow_call`의 `with` 블록에서는 `needs` 컨텍스트를 사용할 수 없습니다.  
 > 성공/실패 알림은 `notify-success` / `notify-failure` job을 각각 분리하고 `if:` 조건으로 제어하세요.
 
-**Lambda 예시**
+<details>
+<summary><strong>Lambda 예시</strong></summary>
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -143,7 +149,10 @@ jobs:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 ```
 
-**ECS 예시** (ecs-service / ecs-task 공통, `cluster_name` 추가)
+</details>
+
+<details>
+<summary><strong>ECS 예시</strong> (ecs-service / ecs-task 공통)</summary>
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -192,10 +201,23 @@ jobs:
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 ```
+
+</details>
 
 ---
 
-#### Reusable Workflow 경로 규칙
+<details>
+<summary><strong>Reusable Workflow 경로 규칙</strong></summary>
 
 GitHub는 `uses:` 로 호출하는 Reusable Workflow를 `.github/workflows/` 아래에서만 인식합니다.  
 `workflow-templates/`에 있는 파일은 호출 불가합니다 ([공식 문서](https://docs.github.com/en/actions/sharing-automations/reusing-workflows#calling-a-reusable-workflow)).
+
+</details>
+
+---
+
+#### 레퍼런스
+
+- [GitHub Reusable Workflows 공식 문서](https://docs.github.com/en/actions/sharing-automations/reusing-workflows)
+- [Slack Block Kit Builder](https://app.slack.com/block-kit-builder)
+- [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks)
