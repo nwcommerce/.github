@@ -4,35 +4,24 @@ on:
   workflow_call:
     inputs:
       template_path:
-        description: >
-          Slack Block Kit JSON 템플릿 파일 경로 (호출 repo 기준).
-          지원 플레이스홀더: ENVIRONMENT, PROJECT_NAME, DEPLOY_TARGET,
-          CLUSTER_NAME, GITHUB_SHA, GITHUB_SHA_SHORT,
-          GITHUB_ACTOR, GITHUB_REF_NAME, GITHUB_SERVER_URL,
-          GITHUB_REPOSITORY, GITHUB_RUN_ID
         required: true
         type: string
       environment:
-        description: 배포 환경 (예: PROD, STG, DEV)
         required: true
         type: string
       project_name:
-        description: 프로젝트명 (예: collabmaker-api)
         required: true
         type: string
       deploy_target:
-        description: 배포 대상 식별자 (Lambda 함수명, ECS 서비스명, Task 정의명 등)
         required: false
         type: string
         default: ''
       cluster_name:
-        description: ECS 클러스터명
         required: false
         type: string
         default: ''
     secrets:
       slack_webhook_url:
-        description: Slack Incoming Webhook URL
         required: true
 
 jobs:
@@ -44,7 +33,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Render & send Slack payload
-        shell: python
+        shell: bash
         env:
           WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
           TEMPLATE_PATH: ${{ inputs.template_path }}
@@ -52,57 +41,59 @@ jobs:
           PROJECT_NAME: ${{ inputs.project_name }}
           DEPLOY_TARGET: ${{ inputs.deploy_target }}
           CLUSTER_NAME: ${{ inputs.cluster_name }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
+          GH_SHA: ${{ github.sha }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_REF_NAME: ${{ github.ref_name }}
+          GH_SERVER_URL: ${{ github.server_url }}
+          GH_REPOSITORY: ${{ github.repository }}
+          GH_RUN_ID: ${{ github.run_id }}
         run: |
+          python3 -c "
           import os, sys
           from pathlib import Path
           import urllib.request, urllib.error
 
-          template_path = Path(os.environ["TEMPLATE_PATH"])
+          template_path = Path(os.environ['TEMPLATE_PATH'])
           if not template_path.exists():
-              print(f"::error::Template not found: {template_path}", flush=True)
+              print('::error::Template not found: ' + str(template_path), flush=True)
               sys.exit(1)
 
-          s = template_path.read_text(encoding="utf-8")
+          s = template_path.read_text(encoding='utf-8')
 
-          sha = os.environ.get("GITHUB_SHA", "")
+          sha = os.environ.get('GH_SHA', '')
           placeholders = {
-              "ENVIRONMENT":       os.environ.get("ENVIRONMENT", ""),
-              "PROJECT_NAME":      os.environ.get("PROJECT_NAME", ""),
-              "DEPLOY_TARGET":     os.environ.get("DEPLOY_TARGET", ""),
-              "CLUSTER_NAME":      os.environ.get("CLUSTER_NAME", ""),
-              "GITHUB_SHA":        sha,
-              "GITHUB_SHA_SHORT":  sha[:7],
-              "GITHUB_ACTOR":      os.environ.get("GITHUB_ACTOR", ""),
-              "GITHUB_REF_NAME":   os.environ.get("GITHUB_REF_NAME", ""),
-              "GITHUB_SERVER_URL": os.environ.get("GITHUB_SERVER_URL", ""),
-              "GITHUB_REPOSITORY": os.environ.get("GITHUB_REPOSITORY", ""),
-              "GITHUB_RUN_ID":     os.environ.get("GITHUB_RUN_ID", ""),
+              'ENVIRONMENT':       os.environ.get('ENVIRONMENT', ''),
+              'PROJECT_NAME':      os.environ.get('PROJECT_NAME', ''),
+              'DEPLOY_TARGET':     os.environ.get('DEPLOY_TARGET', ''),
+              'CLUSTER_NAME':      os.environ.get('CLUSTER_NAME', ''),
+              'GITHUB_SHA':        sha,
+              'GITHUB_SHA_SHORT':  sha[:7],
+              'GITHUB_ACTOR':      os.environ.get('GH_ACTOR', ''),
+              'GITHUB_REF_NAME':   os.environ.get('GH_REF_NAME', ''),
+              'GITHUB_SERVER_URL': os.environ.get('GH_SERVER_URL', ''),
+              'GITHUB_REPOSITORY': os.environ.get('GH_REPOSITORY', ''),
+              'GITHUB_RUN_ID':     os.environ.get('GH_RUN_ID', ''),
           }
           for key, val in placeholders.items():
-              s = s.replace("{{" + key + "}}", val)
+              s = s.replace('{{' + key + '}}', val)
 
-          payload = s.encode("utf-8")
-          webhook_url = os.environ["WEBHOOK_URL"]
+          payload = s.encode('utf-8')
+          webhook_url = os.environ['WEBHOOK_URL']
 
           req = urllib.request.Request(
               webhook_url,
               data=payload,
-              headers={"Content-Type": "application/json"},
-              method="POST",
+              headers={'Content-Type': 'application/json'},
+              method='POST',
           )
           try:
               with urllib.request.urlopen(req) as resp:
                   body = resp.read().decode()
-                  print(f"Slack response: {resp.status} {body}", flush=True)
-                  if body.strip() != "ok":
-                      print(f"::warning::Slack returned non-ok response: {body}")
+                  print('Slack response: ' + str(resp.status) + ' ' + body, flush=True)
+                  if body.strip() != 'ok':
+                      print('::warning::Slack returned non-ok response: ' + body)
           except urllib.error.HTTPError as e:
               body = e.read().decode()
-              print(f"::error::Slack webhook failed: {e.code} {body}", flush=True)
+              print('::error::Slack webhook failed: ' + str(e.code) + ' ' + body, flush=True)
               sys.exit(1)
+          "
