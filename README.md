@@ -25,6 +25,7 @@
 | `environment` | ✅ | 배포 환경 (예: `PROD`, `STG`, `DEV`) |
 | `project_name` | ✅ | 프로젝트명 (예: `collabmaker-api`) |
 | `deploy_target` | ❌ | 배포 대상 식별자 (Lambda 함수명, ECS 서비스명, Task 정의명 등) |
+| `cluster_name` | ❌ | ECS 클러스터명 (ecs-task, ecs-service 템플릿용) |
 
 #### Secrets
 
@@ -41,6 +42,7 @@ JSON 템플릿 내에서 아래 `{{PLACEHOLDER}}` 형식을 사용하면 자동�
 | `{{ENVIRONMENT}}` | `inputs.environment` |
 | `{{PROJECT_NAME}}` | `inputs.project_name` |
 | `{{DEPLOY_TARGET}}` | `inputs.deploy_target` |
+| `{{CLUSTER_NAME}}` | `inputs.cluster_name` (ECS 전용) |
 | `{{GITHUB_SHA}}` | 전체 커밋 SHA |
 | `{{GITHUB_SHA_SHORT}}` | 커밋 SHA 앞 7자 |
 | `{{GITHUB_ACTOR}}` | 워크플로우 트리거한 사용자 |
@@ -87,6 +89,8 @@ slack-templates/
 
 **3. Workflow에서 호출**
 
+**Lambda 예시**
+
 ```yaml
 # .github/workflows/deploy.yml
 
@@ -116,6 +120,43 @@ jobs:
       environment: PROD
       project_name: my-service
       deploy_target: my-lambda-function-name
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+```
+
+**ECS 예시** (ecs-service / ecs-task 공통, `cluster_name` 추가)
+
+```yaml
+# .github/workflows/deploy.yml
+
+jobs:
+  notify-start:
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_path: .github/slack/notify-start.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-ecs-service-name   # ECS 서비스명 또는 Task 정의명
+      cluster_name: my-ecs-cluster
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+
+  deploy:
+    needs: notify-start
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "deploy steps here"
+
+  notify-result:
+    needs: [notify-start, deploy]
+    if: always()
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_path: ${{ needs.deploy.result == 'success' && '.github/slack/notify-success.json' || '.github/slack/notify-failure.json' }}
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-ecs-service-name
+      cluster_name: my-ecs-cluster
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 ```
