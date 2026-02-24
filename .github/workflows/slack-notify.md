@@ -1,7 +1,7 @@
 # slack-notify — Reusable Slack Notification Workflow
 
-배포 시작/성공/실패 알림을 Slack으로 전송하는 재사용 가능한 Workflow입니다.  
-각 repo에서 `workflow_call`로 호출하며, 메시지 템플릿은 각 repo에서 직접 관리합니다.
+배포 시작/성공/실패 알림을 Slack으로 전송하는 재사용 가능한 Workflow입니다.
+각 repo에서 `workflow_call`로 호출하며, 중앙 템플릿(`template_name`) 또는 로컬 템플릿(`template_path`)을 사용할 수 있습니다.
 
 ---
 
@@ -12,11 +12,16 @@
 
 | Input | 필수 | 설명 |
 |---|---|---|
-| `template_path` | ✅ | Slack Block Kit JSON 템플릿 파일 경로 (호출 repo 기준) |
+| `template_name` | ❌ | 중앙 템플릿 경로 (예: `ecs-service/notify-start.json`). `slack-templates/` 기준 상대 경로 |
+| `template_path` | ❌ | 로컬 템플릿 파일 경로 (호출 repo 기준). 커스텀 템플릿 사용 시 |
 | `environment` | ✅ | 배포 환경 (예: `PROD`, `STG`, `DEV`) |
 | `project_name` | ✅ | 프로젝트명 (예: `collabmaker-api`) |
 | `deploy_target` | ❌ | 배포 대상 식별자 (Lambda 함수명, ECS 서비스명, Task 정의명 등) |
 | `cluster_name` | ❌ | ECS 클러스터명 (ecs-task, ecs-service 템플릿용) |
+
+> **`template_name`과 `template_path`는 상호 배타적이며, 둘 중 하나는 반드시 지정해야 합니다.**
+> - `template_name`: `nwcommerce/.github`의 `slack-templates/` 디렉터리에서 중앙 관리되는 템플릿을 사용
+> - `template_path`: 호출 repo에 있는 로컬 커스텀 템플릿을 사용
 
 #### Secrets
 
@@ -52,10 +57,10 @@ JSON 템플릿 내에서 아래 `{{PLACEHOLDER}}` 형식을 사용하면 자동�
 ---
 
 <details>
-<summary><strong>예제 템플릿</strong></summary>
+<summary><strong>중앙 템플릿 목록</strong></summary>
 
-`slack-templates/` 디렉터리에 배포 대상별 예제 템플릿이 있습니다.  
-각 repo의 `.github/slack/` 디렉터리에 복사 후 필요에 따라 수정하세요.
+`slack-templates/` 디렉터리에 배포 대상별 템플릿이 있습니다.
+`template_name`으로 직접 참조할 수 있습니다.
 
 ```
 slack-templates/
@@ -92,17 +97,15 @@ slack-templates/
 `Settings > Secrets and variables > Actions > New repository secret`
 - Name: `DEPLOY_WEBHOOK_URL`
 
-**2. Slack 템플릿 파일 복사**
+**2. Workflow에서 호출**
 
-`slack-templates/{lambda|ecs-service|ecs-task}/` 의 파일을 호출 repo의 `.github/slack/` 에 복사 후 수정.
-
-**3. Workflow에서 호출**
-
-> **주의:** `workflow_call`의 `with` 블록에서는 `needs` 컨텍스트를 사용할 수 없습니다.  
+> **주의:** `workflow_call`의 `with` 블록에서는 `needs` 컨텍스트를 사용할 수 없습니다.
 > 성공/실패 알림은 `notify-success` / `notify-failure` job을 각각 분리하고 `if:` 조건으로 제어하세요.
 
 <details>
-<summary><strong>Lambda 예시</strong></summary>
+<summary><strong>중앙 템플릿 사용 (권장)</strong></summary>
+
+`template_name`을 사용하면 로컬에 템플릿 파일을 복사할 필요 없이 중앙 템플릿을 직접 참조합니다.
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -111,10 +114,11 @@ jobs:
   notify-start:
     uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
-      template_path: .github/slack/notify-start.json
+      template_name: ecs-service/notify-start.json
       environment: PROD
       project_name: my-service
-      deploy_target: my-lambda-function-name
+      deploy_target: my-ecs-service-name
+      cluster_name: my-ecs-cluster
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 
@@ -129,10 +133,11 @@ jobs:
     if: needs.deploy.result == 'success'
     uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
-      template_path: .github/slack/notify-success.json
+      template_name: ecs-service/notify-success.json
       environment: PROD
       project_name: my-service
-      deploy_target: my-lambda-function-name
+      deploy_target: my-ecs-service-name
+      cluster_name: my-ecs-cluster
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 
@@ -141,10 +146,11 @@ jobs:
     if: needs.deploy.result != 'success'
     uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
     with:
-      template_path: .github/slack/notify-failure.json
+      template_name: ecs-service/notify-failure.json
       environment: PROD
       project_name: my-service
-      deploy_target: my-lambda-function-name
+      deploy_target: my-ecs-service-name
+      cluster_name: my-ecs-cluster
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 ```
@@ -152,7 +158,9 @@ jobs:
 </details>
 
 <details>
-<summary><strong>ECS 예시</strong> (ecs-service / ecs-task 공통)</summary>
+<summary><strong>로컬 커스텀 템플릿 사용</strong></summary>
+
+중앙 템플릿을 커스터마이징해야 하는 경우, `template_path`를 사용하여 호출 repo에 있는 로컬 템플릿을 참조할 수 있습니다.
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -164,40 +172,7 @@ jobs:
       template_path: .github/slack/notify-start.json
       environment: PROD
       project_name: my-service
-      deploy_target: my-ecs-service-name
-      cluster_name: my-ecs-cluster
-    secrets:
-      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
-
-  deploy:
-    needs: notify-start
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "deploy steps here"
-
-  notify-success:
-    needs: [notify-start, deploy]
-    if: needs.deploy.result == 'success'
-    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
-    with:
-      template_path: .github/slack/notify-success.json
-      environment: PROD
-      project_name: my-service
-      deploy_target: my-ecs-service-name
-      cluster_name: my-ecs-cluster
-    secrets:
-      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
-
-  notify-failure:
-    needs: [notify-start, deploy]
-    if: needs.deploy.result != 'success'
-    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
-    with:
-      template_path: .github/slack/notify-failure.json
-      environment: PROD
-      project_name: my-service
-      deploy_target: my-ecs-service-name
-      cluster_name: my-ecs-cluster
+      deploy_target: my-lambda-function-name
     secrets:
       slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
 ```
@@ -209,7 +184,7 @@ jobs:
 <details>
 <summary><strong>Reusable Workflow 경로 규칙</strong></summary>
 
-GitHub는 `uses:` 로 호출하는 Reusable Workflow를 `.github/workflows/` 아래에서만 인식합니다.  
+GitHub는 `uses:` 로 호출하는 Reusable Workflow를 `.github/workflows/` 아래에서만 인식합니다.
 `workflow-templates/`에 있는 파일은 호출 불가합니다 ([공식 문서](https://docs.github.com/en/actions/sharing-automations/reusing-workflows#calling-a-reusable-workflow)).
 
 </details>

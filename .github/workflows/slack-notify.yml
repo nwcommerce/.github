@@ -4,8 +4,13 @@ on:
   workflow_call:
     inputs:
       template_path:
-        required: true
+        required: false
         type: string
+        default: ''
+      template_name:
+        required: false
+        type: string
+        default: ''
       environment:
         required: true
         type: string
@@ -29,14 +34,36 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:
+      - name: Validate inputs
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.template_path }}" ] && [ -n "${{ inputs.template_name }}" ]; then
+            echo "::error::template_path and template_name are mutually exclusive. Use only one."
+            exit 1
+          fi
+          if [ -z "${{ inputs.template_path }}" ] && [ -z "${{ inputs.template_name }}" ]; then
+            echo "::error::Either template_path or template_name must be provided."
+            exit 1
+          fi
+
       - name: Checkout caller repo
+        if: inputs.template_path != ''
         uses: actions/checkout@v4
+
+      - name: Checkout shared templates
+        if: inputs.template_name != ''
+        uses: actions/checkout@v4
+        with:
+          repository: nwcommerce/.github
+          ref: main
+          sparse-checkout: slack-templates
+          path: .shared
 
       - name: Render & send Slack payload
         shell: bash
         env:
           WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
-          TEMPLATE_PATH: ${{ inputs.template_path }}
+          TEMPLATE_PATH: ${{ inputs.template_path != '' && inputs.template_path || format('.shared/slack-templates/{0}', inputs.template_name) }}
           ENVIRONMENT: ${{ inputs.environment }}
           PROJECT_NAME: ${{ inputs.project_name }}
           DEPLOY_TARGET: ${{ inputs.deploy_target }}
