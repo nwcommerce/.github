@@ -3,7 +3,7 @@ name: Slack Notify
 on:
   workflow_call:
     inputs:
-      template_path:
+      template_name:
         required: true
         type: string
       environment:
@@ -29,14 +29,19 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout caller repo
+      - name: Checkout shared templates
         uses: actions/checkout@v4
+        with:
+          repository: nwcommerce/.github
+          ref: main
+          sparse-checkout: slack-templates
+          path: .shared
 
       - name: Render & send Slack payload
         shell: bash
         env:
           WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
-          TEMPLATE_PATH: ${{ inputs.template_path }}
+          TEMPLATE_PATH: .shared/slack-templates/${{ inputs.template_name }}
           ENVIRONMENT: ${{ inputs.environment }}
           PROJECT_NAME: ${{ inputs.project_name }}
           DEPLOY_TARGET: ${{ inputs.deploy_target }}
