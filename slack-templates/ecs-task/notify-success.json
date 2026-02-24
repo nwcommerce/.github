@@ -1,17 +1,19 @@
 {
   "username": "R2-D2",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🎉 {{ENVIRONMENT}} Task Definition Updated",
+        "emoji": true
+      }
+    }
+  ],
   "attachments": [
     {
       "color": "#2EB67D",
       "blocks": [
-        {
-          "type": "header",
-          "text": {
-            "type": "plain_text",
-            "text": "🎉 {{ENVIRONMENT}} Task Definition Updated",
-            "emoji": true
-          }
-        },
         {
           "type": "section",
           "fields": [
