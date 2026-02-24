@@ -5,7 +5,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "🎉 {{ENVIRONMENT}} Deployment Successful",
+        "text": "🎉 {{ENVIRONMENT}} Deployment Success",
         "emoji": true
       }
     }
