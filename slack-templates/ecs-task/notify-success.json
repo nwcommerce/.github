@@ -5,7 +5,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "🎉 {{ENVIRONMENT}} Task Definition Updated",
+        "text": "🎉 {{ENVIRONMENT}} Task Definition Success",
         "emoji": true
       }
     }
