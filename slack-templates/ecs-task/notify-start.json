@@ -5,7 +5,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "🚀 {{ENVIRONMENT}} Task Definition Update Started",
+        "text": "🚀 {{ENVIRONMENT}} Task Definition Deploy Started",
         "emoji": true
       }
     }
