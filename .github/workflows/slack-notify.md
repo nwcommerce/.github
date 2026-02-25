@@ -59,6 +59,10 @@ JSON 템플릿 내에서 아래 `{{PLACEHOLDER}}` 형식을 사용하면 자동�
 
 ```
 slack-templates/
+├── amplify/
+│   ├── notify-start.json
+│   ├── notify-success.json
+│   └── notify-failure.json
 ├── lambda/
 │   ├── notify-start.json
 │   ├── notify-success.json
@@ -96,6 +100,56 @@ slack-templates/
 
 > **주의:** `workflow_call`의 `with` 블록에서는 `needs` 컨텍스트를 사용할 수 없습니다.
 > 성공/실패 알림은 `notify-success` / `notify-failure` job을 각각 분리하고 `if:` 조건으로 제어하세요.
+
+<details>
+<summary><strong>Amplify 예시</strong></summary>
+
+```yaml
+# .github/workflows/deploy.yml
+
+jobs:
+  notify-start:
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_name: amplify/notify-start.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-amplify-app-name
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+
+  wait-for-amplify-build:
+    needs: notify-start
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "poll amplify build status here"
+
+  notify-success:
+    needs: [notify-start, wait-for-amplify-build]
+    if: needs.wait-for-amplify-build.result == 'success'
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_name: amplify/notify-success.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-amplify-app-name
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+
+  notify-failure:
+    needs: [notify-start, wait-for-amplify-build]
+    if: always() && needs.wait-for-amplify-build.result != 'success'
+    uses: nwcommerce/.github/.github/workflows/slack-notify.yml@main
+    with:
+      template_name: amplify/notify-failure.json
+      environment: PROD
+      project_name: my-service
+      deploy_target: my-amplify-app-name
+    secrets:
+      slack_webhook_url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+```
+
+</details>
 
 <details>
 <summary><strong>Lambda 예시</strong></summary>
