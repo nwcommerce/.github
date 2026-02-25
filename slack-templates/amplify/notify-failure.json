@@ -1,17 +1,19 @@
 {
   "username": "R2-D2",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🚨 {{ENVIRONMENT}} Deployment Failed",
+        "emoji": true
+      }
+    }
+  ],
   "attachments": [
     {
       "color": "#E01E5A",
       "blocks": [
-        {
-          "type": "header",
-          "text": {
-            "type": "plain_text",
-            "text": "🚨 {{ENVIRONMENT}} Deployment Failed",
-            "emoji": true
-          }
-        },
         {
           "type": "section",
           "fields": [
